@@ -1,3 +1,7 @@
+"""
+degree project
+"""
+
 EX_GRAPH0 = {0: set([1,2]),
              1: set([]),
              2: set([])}
@@ -23,6 +27,11 @@ EX_GRAPH2 = {0: set([1,4,5]),
 
 
 def make_complete_graph(num_nodes):
+    """
+    make a directed graph
+    :param num_nodes: integer
+    :return: dictionary
+    """
     graph = {}
     for node in range(num_nodes):
         neighbors = [n for n in range(num_nodes)]
@@ -31,8 +40,13 @@ def make_complete_graph(num_nodes):
     return graph
 
 def compute_in_degrees(digraph):
+    """
+    compute in-degrees of a directed graph
+    :param digraph: directed graph
+    :return: dictionary
+    """
     nodes_degree = {}
-    for node in range(len(digraph)):
+    for node in digraph.keys():
         nodes_degree[node] = 0
     for neighbors in digraph.itervalues():
         for node in neighbors:
@@ -41,6 +55,11 @@ def compute_in_degrees(digraph):
 #print compute_in_degrees(EX_GRAPH2)
 
 def in_degree_distribution(digraph):
+    """
+    computer distribution of in-degrees
+    :param digraph: directed graph
+    :return:dictionary
+    """
     degree_distribution = {}
     nodes_degree = compute_in_degrees(digraph)
     for counts in nodes_degree.itervalues():
@@ -49,4 +68,4 @@ def in_degree_distribution(digraph):
         else:
             degree_distribution[counts] = 1
     return degree_distribution
-print in_degree_distribution(EX_GRAPH2)
+#print in_degree_distribution(EX_GRAPH2)
