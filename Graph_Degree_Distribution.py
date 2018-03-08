@@ -38,5 +38,15 @@ def compute_in_degrees(digraph):
         for node in neighbors:
             nodes_degree[node] += 1
     return nodes_degree
-
 #print compute_in_degrees(EX_GRAPH2)
+
+def in_degree_distribution(digraph):
+    degree_distribution = {}
+    nodes_degree = compute_in_degrees(digraph)
+    for counts in nodes_degree.itervalues():
+        if counts in degree_distribution:
+            degree_distribution[counts] += 1
+        else:
+            degree_distribution[counts] = 1
+    return degree_distribution
+print in_degree_distribution(EX_GRAPH2)
