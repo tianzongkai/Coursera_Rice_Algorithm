@@ -2,8 +2,6 @@
 Application
 """
 
-import urllib2
-
 """
 Provided code for Application portion of Module 1
 
@@ -14,11 +12,9 @@ Imports physics citation graph
 import urllib2
 import numpy as np
 import matplotlib.pyplot as plt
-
-# Set timeout for CodeSkulptor if necessary
-# import codeskulptor
-# codeskulptor.set_timeout(20)
-
+import random
+import math
+import operator as op
 
 ###################################
 # Code for loading citation graph
@@ -101,13 +97,47 @@ def plot_distribuition(distribution):
     plt.plot(x, y, '.')
     plt.yscale('log')
     plt.xscale('log')
-    plt.xlabel('Degrees')
+    plt.xlabel('in-Degrees')
     plt.ylabel('Frequency')
     plt.title('Log-Log plot of degree distribution')
     plt.show()
 
+def plot_citationgraph_distribution():
+    citation_graph = load_graph(CITATION_URL)
+    degree_distrbtn = in_degree_distribution(citation_graph)
+    plot_distribuition(degree_distrbtn)
+# plot_citationgraph_distribution()
 
-citation_graph = load_graph(CITATION_URL)
-degree_distrbtn = in_degree_distribution(citation_graph)
-plot_distribuition(degree_distrbtn)
+def er_graph(num_node, probability):
+    graph = {}
+    for node in range(num_node):
+        edges = filter(
+            lambda nd: random.random() < probability
+                       and nd != node, range(num_node))
+        graph[node] = set(edges)
+    return graph
 
+def er_distribution(num_node, probability):
+    distribution = {}
+    def calc_subset(n,k):
+        return math.factorial(n)/(math.factorial(k) * math.factorial(n - k))
+
+    def ncr(n, r):
+        r = min(r, n - r)
+        numer = reduce(op.mul, xrange(n, n - r, -1), 1)
+        denom = reduce(op.mul, xrange(1, r + 1), 1)
+        return numer // denom
+    for k in range(num_node):
+        num_subset = ncr(num_node - 1, k)
+        distribution[k] = \
+            (num_subset * (probability ** k) * ((1 - probability) ** (num_node - 1 - k))) \
+            * num_node
+    return distribution
+
+er_distri = er_distribution(277,0.4)
+plot_distribuition(er_distri)
+"""
+Q2:
+1. yes. Expected value of in-degree is the same for every node, which is (n-1) * p
+2.
+"""
