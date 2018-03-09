@@ -34,7 +34,7 @@ def load_graph(graph_url):
     graph_lines = graph_lines[: -1]
 
     print "Loaded graph with", len(graph_lines), "nodes"
-
+    total_edges = 0
     answer_graph = {}
     for line in graph_lines:
         neighbors = line.split(' ')
@@ -42,6 +42,8 @@ def load_graph(graph_url):
         answer_graph[node] = set([])
         for neighbor in neighbors[1: -1]:
             answer_graph[node].add(int(neighbor))
+            total_edges += 1
+    print 'total edges: ', total_edges
     return answer_graph
 
 def compute_in_degrees(digraph):
@@ -51,11 +53,12 @@ def compute_in_degrees(digraph):
     :return: dictionary
     """
     nodes_degree = {}
-    for node in digraph.keys():
-        nodes_degree[node] = 0
-    for neighbors in digraph.itervalues():
-        for node in neighbors:
-            nodes_degree[node] += 1
+    total_indegrees = 0
+    for node, edges in digraph.items():
+        k = len(edges)
+        nodes_degree[node] = k
+        total_indegrees += k
+    print 'total_indegrees: ', total_indegrees
     return nodes_degree
 
 def in_degree_distribution(digraph):
@@ -106,7 +109,7 @@ def plot_citationgraph_distribution():
     citation_graph = load_graph(CITATION_URL)
     degree_distrbtn = in_degree_distribution(citation_graph)
     plot_distribuition(degree_distrbtn)
-# plot_citationgraph_distribution()
+plot_citationgraph_distribution()
 
 def er_graph(num_node, probability):
     graph = {}
@@ -134,12 +137,11 @@ def er_distribution(num_node, probability):
             * num_node
     return distribution
 
-
 def plot_er_distribution():
     ergraph = er_graph(2770, 0.1)
     degree_distrbtn = in_degree_distribution(ergraph)
     plot_distribuition(degree_distrbtn)
-plot_er_distribution()
+# plot_er_distribution()
 # er_distri = er_distribution(277,0.4)
 # plot_distribuition(er_distri)
 """
@@ -149,4 +151,12 @@ Q2:
 3. No. The two distribution look quite differently.Citation graph's distribution is more
 of a monotonic decreasing curve, while the er graph distribution is more like a symetric
 curve (skewed to one side)
+
+Q3.
+Total # of nodes: 27770
+Total # of edges: 352,768
+average # of edges per node: 12.7
+n = 27770
+m = 13
 """
+
