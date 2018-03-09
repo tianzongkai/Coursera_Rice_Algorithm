@@ -134,8 +134,14 @@ def er_distribution(num_node, probability):
             * num_node
     return distribution
 
-er_distri = er_distribution(277,0.4)
-plot_distribuition(er_distri)
+
+def plot_er_distribution():
+    ergraph = er_graph(27770, 0.4)
+    degree_distrbtn = in_degree_distribution(ergraph)
+    plot_distribuition(degree_distrbtn)
+plot_er_distribution()
+# er_distri = er_distribution(277,0.4)
+# plot_distribuition(er_distri)
 """
 Q2:
 1. yes. Expected value of in-degree is the same for every node, which is (n-1) * p
