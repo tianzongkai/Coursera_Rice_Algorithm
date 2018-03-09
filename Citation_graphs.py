@@ -136,7 +136,7 @@ def er_distribution(num_node, probability):
 
 
 def plot_er_distribution():
-    ergraph = er_graph(27770, 0.4)
+    ergraph = er_graph(2770, 0.1)
     degree_distrbtn = in_degree_distribution(ergraph)
     plot_distribuition(degree_distrbtn)
 plot_er_distribution()
@@ -145,5 +145,8 @@ plot_er_distribution()
 """
 Q2:
 1. yes. Expected value of in-degree is the same for every node, which is (n-1) * p
-2.
+2. The in-degree distribution is a bell-shape convex curve with its opening facing down
+3. No. The two distribution look quite differently.Citation graph's distribution is more
+of a monotonic decreasing curve, while the er graph distribution is more like a symetric
+curve (skewed to one side)
 """
