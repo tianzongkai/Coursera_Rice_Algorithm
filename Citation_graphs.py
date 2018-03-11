@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import random
 import math
 import operator as op
+import time
 
 ###################################
 # Code for loading citation graph
@@ -109,7 +110,7 @@ def plot_citationgraph_distribution():
     citation_graph = load_graph(CITATION_URL)
     degree_distrbtn = in_degree_distribution(citation_graph)
     plot_distribuition(degree_distrbtn)
-plot_citationgraph_distribution()
+# plot_citationgraph_distribution()
 
 def er_graph(num_node, probability):
     graph = {}
@@ -141,9 +142,7 @@ def plot_er_distribution():
     ergraph = er_graph(2770, 0.1)
     degree_distrbtn = in_degree_distribution(ergraph)
     plot_distribuition(degree_distrbtn)
-# plot_er_distribution()
-# er_distri = er_distribution(277,0.4)
-# plot_distribuition(er_distri)
+
 """
 Q2:
 1. yes. Expected value of in-degree is the same for every node, which is (n-1) * p
@@ -160,3 +159,81 @@ n = 27770
 m = 13
 """
 
+
+class DPATrial:
+    """
+    Simple class to encapsulate optimized trials for DPA algorithm
+
+    Maintains a list of node numbers with multiple instances of each number.
+    The number of instances of each node number are
+    in the same proportion as the desired probabilities
+
+    Uses random.choice() to select a node number from this list for each trial.
+    """
+
+    def __init__(self, num_nodes):
+        """
+        Initialize a DPATrial object corresponding to a
+        complete graph with num_nodes nodes
+
+        Note the initial list of node numbers has num_nodes copies of
+        each node number
+        """
+        self._num_nodes = num_nodes
+        self._node_numbers = [node for node in range(num_nodes) for dummy_idx in range(num_nodes)]
+        # print self._node_numbers
+    def run_trial(self, num_nodes):
+        """
+        Conduct num_node trials using by applying random.choice()
+        to the list of node numbers
+
+        Updates the list of node numbers so that the number of instances of
+        each node number is in the same ratio as the desired probabilities
+
+        Returns:
+        Set of nodes
+        """
+
+        # compute the neighbors for the newly-created node
+        new_node_neighbors = set()
+        for dummy_idx in range(num_nodes):
+            new_node_neighbors.add(random.choice(self._node_numbers))
+
+        # update the list of node numbers so that each node number
+        # appears in the correct ratio
+        self._node_numbers.append(self._num_nodes)
+        self._node_numbers.extend(list(new_node_neighbors))
+
+        # update the number of nodes
+        self._num_nodes += 1
+        return new_node_neighbors
+
+def dpa_algorithm(num_nodes, avg_edges):
+    graph = {}
+    dpa = DPATrial(avg_edges)
+    for node in range(avg_edges):
+        neighbors = [n for n in range(avg_edges)]
+        del neighbors[node]
+        graph[node] = set(neighbors)
+    totindeg = (avg_edges - 1) ** 2
+    for i in range(avg_edges, num_nodes):
+        new_node_neighbors = dpa.run_trial(avg_edges)
+        graph[i] = new_node_neighbors
+    return graph
+
+def plot_dpa_distribution():
+    start = time.time()
+    dpagraph = dpa_algorithm(27770, 13)
+    end = time.time()
+
+    # total_indegrees = 0
+    # for node, edges in dpagraph.items():
+    #     k = len(edges)
+    #     total_indegrees += k
+    # print 'total_indegrees: ', total_indegrees
+
+    print 'running time:', end-start, 'seconds'
+    #print dpagraph
+    degree_distrbtn = in_degree_distribution(dpagraph)
+    plot_distribuition(degree_distrbtn)
+plot_dpa_distribution()
