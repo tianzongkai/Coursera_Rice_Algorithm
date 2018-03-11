@@ -51,16 +51,23 @@ def compute_in_degrees(digraph):
     """
     compute in-degrees of a directed graph
     :param digraph: directed graph
-    :return: dictionary
+    :return: dictionary {node: indegrees}
     """
-    nodes_degree = {}
+    nodes_indegree = {}
     total_indegrees = 0
-    for node, edges in digraph.items():
-        k = len(edges)
-        nodes_degree[node] = k
-        total_indegrees += k
-    print 'total_indegrees: ', total_indegrees
-    return nodes_degree
+    for edges in digraph.itervalues():
+        for edge_head in edges:
+            if edge_head in nodes_indegree:
+                nodes_indegree[edge_head] += 1
+            else:
+                nodes_indegree[edge_head] = 1
+
+    # for node, edges in digraph.items():
+    #     k = len(edges)
+    #     nodes_degree[node] = k
+    #     total_indegrees += k
+    # print 'total_indegrees: ', total_indegrees
+    return nodes_indegree
 
 def in_degree_distribution(digraph):
     """
@@ -77,7 +84,7 @@ def in_degree_distribution(digraph):
             degree_distribution[degree] = 1
     return degree_distribution
 
-def plot_distribuition(distribution):
+def plot_distribuition(distribution, title):
     # sorted(student_tuples, key=lambda student: student[2])
     #print distribution
     sum = float(reduce(lambda x, y: x+y, distribution.itervalues()))
@@ -103,14 +110,17 @@ def plot_distribuition(distribution):
     plt.xscale('log')
     plt.xlabel('in-Degrees')
     plt.ylabel('Frequency')
-    plt.title('Log-Log plot of degree distribution')
+    # plt.xticks(range(1, np.amax(x)+1))
+    plt.xlim(1, np.amax(x)*2)
+    plt.grid(True)
+    plt.title('Log-Log plot of degree distribution for ' + title)
     plt.show()
 
 def plot_citationgraph_distribution():
     citation_graph = load_graph(CITATION_URL)
     degree_distrbtn = in_degree_distribution(citation_graph)
-    plot_distribuition(degree_distrbtn)
-# plot_citationgraph_distribution()
+    plot_distribuition(degree_distrbtn, 'citation graph')
+
 
 def er_graph(num_node, probability):
     graph = {}
@@ -157,6 +167,16 @@ Total # of edges: 352,768
 average # of edges per node: 12.7
 n = 27770
 m = 13
+
+Q4.
+1. DPA graph is similar to that of the citation graph. They both are in shape of monotonic
+decreasing curve and both have a flat tail at the end of the curve. They both have similar
+range in x and y values.
+2. 
+This is useful for modeling many real-world processes that are akin to "popularity 
+contests", where the popularity of a particular choice causes new participants to 
+adopt the same choice (which can lead to the outsized influence of the first few 
+participants).
 """
 
 
@@ -233,7 +253,10 @@ def plot_dpa_distribution():
     # print 'total_indegrees: ', total_indegrees
 
     print 'running time:', end-start, 'seconds'
-    #print dpagraph
+    # print dpagraph
     degree_distrbtn = in_degree_distribution(dpagraph)
-    plot_distribuition(degree_distrbtn)
-plot_dpa_distribution()
+    plot_distribuition(degree_distrbtn, 'dpa graph')
+
+# plot_citationgraph_distribution()
+
+# plot_dpa_distribution()
