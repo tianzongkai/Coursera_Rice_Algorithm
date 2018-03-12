@@ -172,11 +172,13 @@ Q4.
 1. DPA graph is similar to that of the citation graph. They both are in shape of monotonic
 decreasing curve and both have a flat tail at the end of the curve. They both have similar
 range in x and y values.
-2. 
-This is useful for modeling many real-world processes that are akin to "popularity 
-contests", where the popularity of a particular choice causes new participants to 
-adopt the same choice (which can lead to the outsized influence of the first few 
-participants).
+2. The "rich gets richer" phenomenon mimics the behavior of the DPA process.
+The first few nodes has higher probability to be selected by the random process which 
+makes them always have higher probability for following node selection processes.
+3. Still the  "rich gets richer" phenomenon.
+The popularity of a particular paper causes new paper to cite the same choice 
+(which can lead to the outsized influence of the first few papers).
+
 """
 
 
