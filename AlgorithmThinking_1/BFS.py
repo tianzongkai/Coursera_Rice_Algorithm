@@ -7,6 +7,12 @@ import random
 
 def bfs_visited(ugraph, start_node):
     """
+    Implementation of bfs_visited algorithm
+    :param ugraph: undirected graph
+    :param start_node: a node to start
+    :return: a set consisting of all connected components
+    """
+    """
     len(d)
     d.append('1')
     d.popleft()
@@ -14,15 +20,15 @@ def bfs_visited(ugraph, start_node):
     d.extendleft([0])
     d.extend([6,7,8]) -- extend from right
     """
-    q = deque()
+    queue = deque()
     visited = set([start_node])
-    q.append(start_node)
-    while len(q) > 0:
-        j_ = q.popleft()
-        for neighbor in ugraph[j_]:
+    queue.append(start_node)
+    while len(queue) > 0:
+        popped = queue.popleft()
+        for neighbor in ugraph[popped]:
             if neighbor not in visited:
                 visited.add(neighbor)
-                q.append(neighbor)
+                queue.append(neighbor)
     return visited
 
 def cc_visited(ugraph):
@@ -33,10 +39,10 @@ def cc_visited(ugraph):
     in a connected component
     """
     remaining_nodes = ugraph.keys()
-    c_c = []
+    connected_components = []
     while len(remaining_nodes) > 0:
-        i_ = random.choice(remaining_nodes)
-        w_ = bfs_visited(ugraph, i_)
-        c_c.append(w_)
-        remaining_nodes = list(set(remaining_nodes) - w_)
-    return c_c
+        choiced = random.choice(remaining_nodes)
+        visted_nodes = bfs_visited(ugraph, choiced)
+        connected_components.append(visted_nodes)
+        remaining_nodes = list(set(remaining_nodes) - visted_nodes)
+    return connected_components
