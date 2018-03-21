@@ -1,5 +1,6 @@
 """
 Code for BFS
+week 3 project #2
 """
 
 from collections import deque
