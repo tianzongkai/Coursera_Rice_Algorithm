@@ -10,6 +10,7 @@ import random
 import time
 import math
 import matplotlib.pyplot as plt
+import gc
 
 def bfs_visited(ugraph, start_node):
     """
@@ -192,10 +193,15 @@ def compute_degrees(ugraph):
 def create_er_graph(num_node, probability):
     graph = {}
     for node in range(num_node):
+        graph[node] = set()
+    # print graph
+    for node in range(num_node):
         edges = filter(
-            lambda nd: random.random() < probability
+            lambda nd: random.random() < probability / 2
                        and nd != node, range(num_node))
-        graph[node] = set(edges)
+        graph[node] = graph[node] | set(edges)
+        for neighbor in edges:
+            graph[neighbor].add(node)
     return graph
 
 class UPATrial:
@@ -283,9 +289,17 @@ Q2: 20% of nodes are about 250 nodes. So there'are ~990 remaining nodes,
     75% of which is ~750. As long as the size of largest cc is above 750 when
     x-axis = 250, the graph is resilient. At 250, all three graphs are above 750,
     so they're all resilient under the attack.
-Q3: 
+Q3: running time:
+    targered_order = O(n^2)
+    fast_targeted_order = O(nm), since m=5 is given. = O(n)
+Q5: *Network graph is very not resilient at all as the size of largest cc drop down to 
+    nearly zero when 20% nodes removed.
+    *Er graph is resilient as the size of largest cc is about 900 after 20% nodes removed
+    *UPA graph is on the thredshold of resilience as its size of largest cc is about 750.
+    
 """
 
+###Q1###
 def plot_resilience():
     # Loaded graph with 1239 nodes
     # total_degrees:  3047
@@ -332,19 +346,156 @@ def plot_resilience():
     plt.show()
 
 # plot_resilience()
-# upa_graph = upa_algorithm(1239, 3)
 
+
+###Q3###
+def copy_graph(graph):  #O(n)
+    """
+    Make a copy of a graph
+    """
+    new_graph = {}  #O(1)
+    for node in graph:  #O(n)
+        new_graph[node] = set(graph[node])  #O(1)
+    return new_graph
+
+def delete_node(ugraph, node): #O(m)
+    """
+    Delete a node from an undirected graph
+    """
+    # print ugraph, node
+    neighbors = ugraph[node]    #O(1)
+    ugraph.pop(node)    #O(1)
+    for neighbor in neighbors:  #O(m)
+        ugraph[neighbor].remove(node)   #O(1)
+
+def targeted_order(ugraph):
+    # O(n+1+ n*(1+n*3+2+m)) = O(n^2)
+    new_graph = copy_graph(ugraph)  # O(n)
+    order = []  # O(1)
+    while len(new_graph) > 0:   # o(n)
+        max_degree = -1 # O(1)
+        for node in new_graph: # O(n)
+            if len(new_graph[node]) > max_degree: # O(1)
+                max_degree = len(new_graph[node])   # O(1)
+                max_degree_node = node  # O(1)
+
+        neighbors = new_graph[max_degree_node]  # O(1)
+        new_graph.pop(max_degree_node)  # O(1)
+        for neighbor in neighbors:  # O(m)
+            new_graph[neighbor].remove(max_degree_node) # O(1)
+        order.append(max_degree_node)   #   O(1)
+    return order
+
+def fast_targeted_order(ugraph):
+    # O(n+1+n+2n+1+1 + n*1*(1+1+m*3+1+3)) = O(4n+3+6n+3mn) = O(nm)
+    new_graph = copy_graph(ugraph) # O(n)
+    n = len(new_graph) # O(1)
+    degree_sets = [set() for _ in range(n)]  #O(n)
+    for i in range(n):  # O(n)
+        if i in new_graph:
+            d = len(new_graph[i])   # O(1)
+            degree_sets[d].add(i)   # O(1)
+    print degree_sets
+    l = []  # O(1)
+    i = 0   # O(1)
+    for k in range(n - 1, -1, -1):  # O(n)
+        print 'k', k
+        while degree_sets[k]:   # O(1)
+            print degree_sets[k]
+            u = random.sample(degree_sets[k], 1)[0] # O(1)
+            print 'u', u
+            degree_sets[k].remove(u)    # O(1)
+            for v in new_graph[u]:  # O(m)
+                # print graph[u]
+                d = len(new_graph[v])   # O(1)
+                print 'v', v
+                print 'd', d
+                degree_sets[d].remove(v)    # O(1)
+                degree_sets[d - 1].add(v)   # O(1)
+            l.append(u) #(1)
+            delete_node(new_graph, u)   # O(m)
+    return l    #O(1)
+
+def plot_theory_running_times():
+    n = range(10, 1000, 10)
+    square = [i ** 2 for i in n]
+    plt.plot(n, n, label="O(n)")
+    plt.plot(n, square, label="O(n^2)")
+    plt.legend()
+    # plt.xlim(0,1300)
+    # plt.ylim(0,1300)
+    # plt.xticks(range(0, 1301, 100))
+    # plt.yticks(range(0, 1301, 100))
+    # plt.grid()
+    plt.ylabel('Running time')
+    plt.xlabel('Number of nodes')
+    plt.title("Mathematical running complexity")
+    plt.show()
+
+def plot_empirical_running_time():
+    n_list = range(10, 1000, 10)
+    targeted_list = []
+    fast_targeted_list = []
+    for n in n_list:
+        upa_graph = upa_algorithm(n, 5)
+        start = time.clock()
+        repeat = 50
+        for _ in range(repeat):
+            targeted_order(upa_graph)
+        end_1 = time.clock()
+        for _ in range(repeat):
+            fast_targeted_order(upa_graph)
+        end_2 = time.clock()
+        targeted_list.append((end_1 - start) / repeat)
+        fast_targeted_list.append((end_2 - end_1) / repeat)
+    plt.plot(n_list, targeted_list, label="targeted_order, O(n^2)")
+    plt.plot(n_list, fast_targeted_list, label="fast_targeted_order, O(n)")
+    plt.legend()
+    plt.ylabel('Running time')
+    plt.xlabel('Number of nodes')
+    plt.title("Empirical running complexity")
+    plt.show()
+
+
+# gc.disable()
+# # plot_theory_running_times()
+# plot_empirical_running_time()
+# gc.enable()
 
 ###Q4###
-def fast_targeted_order(graph):
-    n = len(graph)
-    degree_sets = [set() for _ in range(n)]
-    for i in range(n):
-        d = len(graph[i])
-        degree_sets[d].add(i)
-    l = []
-    i = 0
-    for k in range(n - 1, -1, -1):
-        while degree_sets[k]:
-            u = random.choice(degree_sets[k])
+def target_attack_resilience():
+    network_graph = load_graph(NETWORK_URL)
+    network_graph_attack_order = targeted_order(network_graph)
+    network_graph_resilience = compute_resilience(
+        network_graph, network_graph_attack_order)
+    print '1'
+    # compute_degrees(network_graph)
 
+    num_nodes_removed = range(1240)
+
+    er_graph = create_er_graph(1239, 0.004)
+    er_graph_attack_order = targeted_order(er_graph)
+    # print er_graph_attack_order
+    er_graph_resilience = compute_resilience(er_graph, er_graph_attack_order)
+    print '2'
+    upa_graph = upa_algorithm(1239, 3)
+    upa_graph_attack_order = targeted_order(upa_graph)
+    upa_graph_resilience = compute_resilience(upa_graph, upa_graph_attack_order)
+
+    plt.plot(num_nodes_removed, network_graph_resilience, label="network graph")
+    plt.plot(num_nodes_removed, er_graph_resilience, label="er graph, p = 0.004")
+    plt.plot(num_nodes_removed, upa_graph_resilience, label="upa graph, m = 3")
+    plt.legend()
+    plt.xlim(0,1300)
+    plt.ylim(0,1300)
+    plt.xticks(range(0, 1301, 100))
+    plt.yticks(range(0, 1301, 100))
+    plt.grid()
+    plt.ylabel('Size of largest connect compnent')
+    plt.xlabel('Number of nodes removed')
+
+    plt.title("Q4. Graph Resilience after targeted attack")
+
+    plt.show()
+
+target_attack_resilience()
