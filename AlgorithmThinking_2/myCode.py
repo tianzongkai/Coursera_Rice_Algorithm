@@ -12,7 +12,7 @@ where cluster_list is a 2D list of clusters in the plane
 """
 
 import math
-import Cluster
+import alg_cluster
 
 
 ######################################################
@@ -71,6 +71,22 @@ def closest_pair_strip(cluster_list, horiz_center, half_width):
     """
 
     return ()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 ######################################################################
