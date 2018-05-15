@@ -12,7 +12,7 @@ where cluster_list is a 2D list of clusters in the plane
 """
 
 import math
-import alg_cluster
+import Cluster
 
 
 ######################################################
