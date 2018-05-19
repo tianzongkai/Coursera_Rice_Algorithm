@@ -54,6 +54,14 @@ def compute_alignment_matrix(seq_x,seq_y,scoring_matrix,global_flag):
     return s_alignment_matrix
 
 def compute_global_alignment(seq_x,seq_y,scoring_matrix,alignment_matrix):
+    """
+    compute glbal alighment
+    :param seq_x:
+    :param seq_y:
+    :param scoring_matrix:
+    :param alignment_matrix:
+    :return: (score, X', Y')
+    """
     idx_i, idx_j = len(seq_x), len(seq_y)
     ret_score = alignment_matrix[idx_i][idx_j]
     x_ret, y_ret = '', ''
@@ -88,9 +96,72 @@ def compute_global_alignment(seq_x,seq_y,scoring_matrix,alignment_matrix):
         idx_j -= 1
     return (ret_score, x_ret, y_ret)
 
-seq_x = 'ATG'
-seq_y = 'ACG'
-score_matrix = build_scoring_matrix(set(['A','C','T','G']), 6,2,-4)
-align_matrix = compute_alignment_matrix(seq_x,seq_y,score_matrix,True)
-print 'align_matrix', align_matrix
-print compute_global_alignment(seq_x,seq_y,score_matrix,align_matrix)
+
+def compute_local_alignment(seq_x,seq_y,scoring_matrix,alignment_matrix):
+    """
+    computer local alighment. Start from cell with highest score and trackback till zero
+    :param seq_x:
+    :param seq_y:
+    :param scoring_matrix:
+    :param alignment_matrix:
+    :return: (best score, X', Y')
+    """
+    best_score = 0
+    len_m, len_n = len(seq_x), len(seq_y)
+    best_i = 0
+    best_j = 0
+    x_ret, y_ret = '', ''
+    for idx_i in range(len_m+1):
+        for idx_j in range(len_n+1):
+            if alignment_matrix[idx_i][idx_j] > best_score:
+                best_score = alignment_matrix[idx_i][idx_j]
+                best_i = idx_i
+                best_j = idx_j
+    idx_i = best_i
+    idx_j = best_j
+    while idx_i != 0 and idx_j != 0:
+        if alignment_matrix[idx_i][idx_j] == 0:
+            return (best_score, x_ret, y_ret)
+        if alignment_matrix[idx_i][idx_j] == (alignment_matrix[idx_i-1][idx_j-1] +
+            scoring_matrix[seq_x[idx_i-1]][seq_y[idx_j-1]]):
+            # score from diagnoal cell
+            x_ret = (seq_x[idx_i-1]) + x_ret
+            y_ret = (seq_y[idx_j-1]) + y_ret
+            idx_i -= 1
+            idx_j -= 1
+        elif alignment_matrix[idx_i][idx_j] == (alignment_matrix[idx_i-1][idx_j] +
+            scoring_matrix[seq_x[idx_i-1]]['-']):
+            # score from above cell
+            x_ret = (seq_x[idx_i - 1]) + x_ret
+            y_ret = ('-') + y_ret
+            idx_i -= 1
+        else:
+            # score from left cell
+            x_ret = ('-') + x_ret
+            y_ret = (seq_y[idx_j - 1]) + y_ret
+            idx_j -= 1
+    while idx_i != 0:
+        if alignment_matrix[idx_i][idx_j] == 0:
+            return (best_score, x_ret, y_ret)
+
+        # idx_j = 0, move upward along first column
+        x_ret = (seq_x[idx_i - 1]) + x_ret
+        y_ret = ('-') + y_ret
+        idx_i -= 1
+    while idx_j != 0:
+        if alignment_matrix[idx_i][idx_j] == 0:
+            return (best_score, x_ret, y_ret)
+
+        # idx_i = 0, move left along first row
+        x_ret = ('-') + x_ret
+        y_ret = (seq_y[idx_j - 1]) + y_ret
+        idx_j -= 1
+    return (best_score, x_ret, y_ret)
+
+
+# seq_x = 'ATG'
+# seq_y = 'ACG'
+# score_matrix = build_scoring_matrix(set(['A','C','T','G']), 6,2,-4)
+# align_matrix = compute_alignment_matrix(seq_x,seq_y,score_matrix,True)
+# print 'align_matrix', align_matrix
+# print compute_global_alignment(seq_x,seq_y,score_matrix,align_matrix)
