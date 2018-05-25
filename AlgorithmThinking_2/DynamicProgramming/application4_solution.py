@@ -199,16 +199,20 @@ def q4():
 
 def q5():
     scores = [37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 82, 83]
-    mean = float(sum(scores)) / len(scores)
-    var = sum([(float(s)-mean) ** 2 for s in scores]) / len(scores)
+    weights = [0.1, 0.1, 0.3, 1.2, 1.9, 2.8, 3.9, 4.6, 6.1, 6.4, 8.1, 6.7, 7.2, 5.7, 4.8, 5.8, 4.6, 3.9, 3.9, 2.6, 2.9, 2.3, 2.6, 2.0, 0.8, 1.8, 1.2, 0.8, 0.8, 0.8, 1.0, 0.4, 0.2, 0.2, 0.3, 0.3, 0.1, 0.2, 0.2, 0.1, 0.1, 0.2]
+    weight_score = [float(score)*weight/100 for score,weight in zip(scores,weights)]
+    mean = sum(weight_score)
+    scores_minus_mean = [(float(s)-mean) ** 2 for s in scores]
+    weight_score = [float(score)*weight/100 for score,weight in zip(scores_minus_mean,weights)]
+    var = sum(weight_score)
     std = math.sqrt(var)
     local_alignment_score = 875
     z_score = (float(local_alignment_score) - mean) / std
     print 'Mean: %.2f\nStandard deviation: %.2f\nz-score: %.2f' %(mean, std, z_score)
     """
-    Mean: 58.67
-    Standard deviation: 12.50
-    z-score: 65.30
+    Mean: 52.01
+    Standard deviation: 6.91
+    z-score: 119.12
     """
 q5()
 
@@ -219,7 +223,45 @@ The bell-shape distribution from q4 is obtained by randomly shuffling fly protei
  human and fly sequence is also obtain by chance, the score should be more likely to fall 
  under range of [mean-3*std, mean+3*std]. 
  
- However, from calcuation of q5, original human-fly local alignment score is 65 times of 
- standard deviation which is in far tail region of the bell-shape distribution. It means that
- the original score of 875 is not by chance.
+ However, from calcuation of q5, original human-fly local alignment score is 120 standard
+  deviation away from mean which is in far tail region of the bell-shape distribution. 
+  It means that the original score of 875 is not by chance.
 """
+
+### Question 7 ###
+"""
+diag_score = 2
+off_diag_score = 1
+dash_score = 0
+"""
+
+### Question 8 ###
+#
+def check_spelling(checked_word,dist,word_list):
+    diag_score = 2
+    off_diag_score = 1
+    dash_score = 0
+    chars = 'abcdefghijklmnopqrstuvwxyz'
+    alphabet = set([char for char in chars])
+    len_checkedword = len(checked_word)
+    scoring_matrix = student.build_scoring_matrix(alphabet, diag_score, off_diag_score, dash_score)
+    similar_word_list = []
+    for word in word_list:
+        global_alignment_matrix = student.compute_alignment_matrix(checked_word,word,scoring_matrix,True)
+        global_alignment_score = student.compute_global_alignment(checked_word,word,scoring_matrix,global_alignment_matrix)[0]
+        edit_dist = len_checkedword + len(word) - global_alignment_score
+        if edit_dist <= dist:
+            similar_word_list.append(word)
+    return  similar_word_list
+
+def q8():
+    word_list = read_words(WORD_LIST_URL)
+    for word, dist in zip(['humble', 'firefly'], [1,2]):
+        similar_list = check_spelling(word, dist, word_list)
+        print 'similar words to %s is %r' %(word, similar_list)
+    """
+    similar words to humble is ['bumble', 'fumble', 'humble', 'humbled', 'humbler', 'humbles', 'humbly', 'jumble', 'mumble', 'rumble', 'tumble']
+    similar words to firefly is ['direly', 'finely', 'fireclay', 'firefly', 'firmly', 'firstly', 'fixedly', 'freely', 'liefly', 'refly', 'tiredly']
+    """
+# q8()
+
